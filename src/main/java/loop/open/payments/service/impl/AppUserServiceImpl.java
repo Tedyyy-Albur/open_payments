@@ -23,8 +23,8 @@ public class AppUserServiceImpl implements AppUserService {
     @Autowired
     private RoleRepository roleRepository;
 
-    /*@Autowired
-    private PasswordEncoder passwordEncoder;*/
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Crea un nuevo usuario.
@@ -33,8 +33,6 @@ public class AppUserServiceImpl implements AppUserService {
      * @return El usuario guardado en la base de datos.
      */
     public AppUser registerUser(AppUser user) {
-        // Encriptar la contraseña antes de guardarla
-        //user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Asignar el rol de usuario por defecto ("ROLE_USER")
         // Esto asume que el rol "ROLE_USER" ya existe en la base de datos.
@@ -42,8 +40,34 @@ public class AppUserServiceImpl implements AppUserService {
           //      .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
 
         //user.setRoles(Collections.singleton(userRole));
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            throw new RuntimeException("Username es requerido");
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new RuntimeException("Email es requerido");
+        }
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new RuntimeException("Password es requerido");
+        }
+        if (appUserRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("Username ya existe");
+        }
+        if (appUserRepository.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email ya existe");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        Role userRole  = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
+       // Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+       //         .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado."));
+        user.getRoles().clear();
+        user.getRoles().add(userRole);
+        //user.getRoles().add(adminRole);
 
         return appUserRepository.save(user);
+
     }
 
     public List<AppUser> getAllUsers() {

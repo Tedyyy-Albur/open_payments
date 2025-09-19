@@ -1,5 +1,6 @@
 package loop.open.payments.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,7 +42,8 @@ public class AppUser implements UserDetails {
     @Column(name = "lastname")
     private String lastname;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password", nullable = false, length = 100)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
